@@ -1,5 +1,6 @@
 import os
-from flask import Flask, jsonify
+import traceback
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from app.extensions import db
 from app.config import Config
@@ -8,7 +9,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Enable CORS for frontend applications (allow localhost, preview urls, vercel deploys)
+    # Enable CORS for frontend applications
     CORS(app, resources={r"/api/*": {"origins": "*"}}, methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 
     # Initialize extensions
@@ -29,13 +30,29 @@ def create_app(config_class=Config):
 
     @app.errorhandler(500)
     def handle_server_error(e):
-        return jsonify({"message": "An unexpected internal server error occurred", "error": "500 Internal Server Error"}), 500
+        err_msg = str(e)
+        app.logger.error(f"Internal Server Error: {err_msg}")
+        return jsonify({
+            "message": "Internal server error occurred while processing request.",
+            "error": err_msg
+        }), 500
 
-    # Ensure tables are created upon initialization
+    # Ensure tables are created upon initialization or first request
+    @app.before_request
+    def ensure_db_tables():
+        # Only run table check once per worker context
+        if not getattr(app, "_tables_initialized", False):
+            try:
+                db.create_all()
+                app._tables_initialized = True
+            except Exception as ex:
+                app.logger.warning(f"Deferred table initialization failed: {ex}")
+
     with app.app_context():
         try:
             db.create_all()
+            app._tables_initialized = True
         except Exception as e:
-            app.logger.warning(f"Database table creation deferred or failed: {e}")
+            app.logger.warning(f"Database table creation deferred: {e}")
 
     return app

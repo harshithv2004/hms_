@@ -65,10 +65,13 @@ export default function PatientForm({ initialData = null, options, onSubmit, isS
         age: parseInt(formData.age, 10),
       });
     } catch (err) {
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
+      const responseData = err.response?.data;
+      if (responseData?.errors) {
+        setErrors(responseData.errors);
+      } else if (responseData?.message) {
+        setServerError(`${responseData.message}${responseData?.error ? ': ' + responseData.error : ''}`);
       } else {
-        setServerError(err.response?.data?.message || err.message || 'Operation failed');
+        setServerError(err.message || 'Operation failed');
       }
     }
   };
