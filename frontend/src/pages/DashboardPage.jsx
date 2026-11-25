@@ -68,7 +68,9 @@ export default function DashboardPage() {
         setStats(data.stats);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to retrieve patient admissions.');
+      const resp = err.response?.data;
+      const detail = resp?.error ? ` (${resp.error})` : '';
+      setError((resp?.message || 'Failed to retrieve patient admissions.') + detail);
     } finally {
       setLoading(false);
     }
