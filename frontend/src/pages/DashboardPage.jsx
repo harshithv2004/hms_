@@ -11,6 +11,7 @@ import {
   dischargePatient,
   deletePatient,
 } from '../services/api';
+import { DEFAULT_OPTIONS } from '../utils/validation';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function DashboardPage() {
   // State
   const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState({ total: 0, admitted: 0, discharged: 0 });
-  const [options, setOptions] = useState(null);
+  const [options, setOptions] = useState(DEFAULT_OPTIONS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   

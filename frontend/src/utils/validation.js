@@ -1,4 +1,40 @@
+export const DEFAULT_OPTIONS = {
+  genders: ['Male', 'Female', 'Other'],
+  wards: [
+    'General Ward A',
+    'General Ward B',
+    'ICU',
+    'Pediatrics Ward',
+    'Maternity Ward',
+    'Orthopedic Ward',
+    'Cardiology Ward',
+    'Emergency Care',
+  ],
+  departments: [
+    'General Medicine',
+    'Cardiology',
+    'Orthopedics',
+    'Pediatrics',
+    'Neurology',
+    'Obstetrics & Gynecology',
+    'General Surgery',
+    'Dermatology',
+  ],
+  doctors: [
+    'Dr. Rajesh Sharma (Cardiology)',
+    'Dr. Ananya Iyer (General Medicine)',
+    'Dr. Priya Mehta (Pediatrics)',
+    'Dr. Vikram Patel (Orthopedics)',
+    'Dr. Suresh Menon (Neurology)',
+    'Dr. Sunita Rao (Obstetrics & Gynecology)',
+    'Dr. Arvind Nair (General Surgery)',
+    'Dr. Deepa Mukherjee (Dermatology)',
+  ],
+  statuses: ['Admitted', 'Discharged'],
+};
+
 export const validatePatient = (formData, validOptions = null) => {
+  const options = validOptions || DEFAULT_OPTIONS;
   const errors = {};
 
   // Name: Required, letters and spaces only, 2-100 chars
@@ -30,28 +66,28 @@ export const validatePatient = (formData, validOptions = null) => {
   // Gender: Required, match allowed options
   if (!formData.gender) {
     errors.gender = 'Gender is required.';
-  } else if (validOptions?.genders && !validOptions.genders.includes(formData.gender)) {
+  } else if (options?.genders && !options.genders.includes(formData.gender)) {
     errors.gender = 'Please select a valid gender from the options.';
   }
 
   // Ward: Required, match allowed options
   if (!formData.ward) {
     errors.ward = 'Ward is required.';
-  } else if (validOptions?.wards && !validOptions.wards.includes(formData.ward)) {
+  } else if (options?.wards && !options.wards.includes(formData.ward)) {
     errors.ward = 'Please select a valid ward.';
   }
 
   // Department: Required, match allowed options
   if (!formData.department) {
     errors.department = 'Department is required.';
-  } else if (validOptions?.departments && !validOptions.departments.includes(formData.department)) {
+  } else if (options?.departments && !options.departments.includes(formData.department)) {
     errors.department = 'Please select a valid department.';
   }
 
   // Doctor: Required, match allowed options
   if (!formData.doctor) {
     errors.doctor = 'Doctor is required.';
-  } else if (validOptions?.doctors && !validOptions.doctors.includes(formData.doctor)) {
+  } else if (options?.doctors && !options.doctors.includes(formData.doctor)) {
     errors.doctor = 'Please select a valid doctor.';
   }
 
@@ -61,7 +97,6 @@ export const validatePatient = (formData, validOptions = null) => {
   } else {
     const selectedDate = new Date(formData.admission_date);
     const today = new Date();
-    // Normalize today to start of day for accurate comparison
     today.setHours(23, 59, 59, 999);
 
     if (isNaN(selectedDate.getTime())) {

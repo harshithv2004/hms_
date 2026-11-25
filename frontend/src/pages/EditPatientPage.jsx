@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PatientForm from '../components/PatientForm';
 import { getOptions, getPatientById, updatePatient } from '../services/api';
+import { DEFAULT_OPTIONS } from '../utils/validation';
 import { AlertCircle } from 'lucide-react';
 
 export default function EditPatientPage() {
@@ -9,7 +10,7 @@ export default function EditPatientPage() {
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState(null);
-  const [options, setOptions] = useState(null);
+  const [options, setOptions] = useState(DEFAULT_OPTIONS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,12 +19,20 @@ export default function EditPatientPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [opts, patientData] = await Promise.all([
+        const [optsRes, patientData] = await Promise.allSettled([
           getOptions(),
           getPatientById(id),
         ]);
-        setOptions(opts);
-        setPatient(patientData);
+        
+        if (optsRes.status === 'fulfilled' && optsRes.value?.genders) {
+          setOptions(optsRes.value);
+        }
+
+        if (patientData.status === 'fulfilled') {
+          setPatient(patientData.value);
+        } else {
+          throw patientData.reason;
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load patient record.');
       } finally {

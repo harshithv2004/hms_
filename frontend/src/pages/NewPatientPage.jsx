@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PatientForm from '../components/PatientForm';
 import { getOptions, createPatient } from '../services/api';
+import { DEFAULT_OPTIONS } from '../utils/validation';
 
 export default function NewPatientPage() {
   const navigate = useNavigate();
-  const [options, setOptions] = useState(null);
+  const [options, setOptions] = useState(DEFAULT_OPTIONS);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const opts = await getOptions();
-        setOptions(opts);
+        if (opts && opts.genders) {
+          setOptions(opts);
+        }
       } catch (err) {
-        console.error('Failed to load options:', err);
+        console.warn('API options request failed, using default options:', err);
       }
     };
     fetchOptions();
